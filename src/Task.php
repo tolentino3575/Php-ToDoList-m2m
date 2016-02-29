@@ -2,16 +2,15 @@
 class Task
 {
     private $description;
-    private $category_id;
     private $id;
-    private $due;
+    private $done;
 
-    function __construct($description, $id = null, $category_id, $due)
+
+    function __construct($description, $id = null, $done = false)
     {
       $this->description = $description;
       $this->id = $id;
-      $this->category_id = $category_id;
-      $this->due = $due;
+      $this->done = $done;
     }
     function getId()
     {
@@ -21,14 +20,7 @@ class Task
     {
       $this->due = (string) $new_due;
     }
-    function getDue()
-    {
-      return $this->due;
-    }
-    function getCategoryId()
-    {
-      return $this->category_id;
-    }
+
     function setDescription($new_description)
     {
       $this->description = (string) $new_description;
@@ -39,7 +31,7 @@ class Task
     }
     function save()
     {
-      $GLOBALS['DB']->exec("INSERT INTO tasks (description, category_id, due) VALUES ('{$this->getDescription()}', {$this->getCategoryId()}, '{$this->getDue()}');");
+      $GLOBALS['DB']->exec("INSERT INTO tasks (description) VALUES ('{$this->getDescription()}');");
       $this->id = $GLOBALS['DB']->lastInsertId();
     }
     static function getAll()
@@ -50,14 +42,35 @@ class Task
       foreach($returned_tasks as $task) {
           $description = $task['description'];
           $id = $task['id'];
-          $category_id = $task['category_id'];
-          $due = $task['dueDate'];
-          $new_task = new Task($description, $id, $category_id, $due);
+          $new_task = new Task($description, $id);
           array_push($tasks, $new_task);
       }
       return $tasks;
     }
 
+    function addCategory($category)
+    {
+      $GLOBALS['DB']->exec("INSERT INTO categories_tasks (category_id, task_id) VALUES ({$category->getId()}, {$this->getId()});");
+    }
+
+    function getCategories()
+    {
+        $query = $GLOBALS['DB']->query("SELECT category_id FROM categories_tasks WHERE task_id = {$this->getId()};");
+        $category_ids = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        $categories = array();
+        foreach($category_ids as $id){
+          $category_id = $id['category_id'];
+          $result = $GLOBALS['DB']->query("SELECT * FROM categories WHERE id = {$category_id};");
+
+          $returned_category = $result->fetchAll(PDO::FETCH_ASSOC);
+          $name = $returned_category[0]['name'];
+          $id = $returned_category[0]['id'];
+          $new_category = new Category($name, $id);
+          array_push($categories, $new_category);
+        }
+        return $categories;
+    }
     static function deleteAll()
     {
        $GLOBALS['DB']->exec("DELETE FROM tasks;");
@@ -75,5 +88,12 @@ class Task
           }
       } return $found_task;
     }
+
+    function delete()
+    {
+      $GLOBALS['DB']->exec("DELETE FROM tasks WHERE id = {$this->getId()};");
+      $GLOBALS['DB']->exec("DELETE FROM categories_tasks WHERE task_id = {$this->getId()};");
+    }
+
 }
 ?>

@@ -3,29 +3,29 @@
     <title>To Do List</title>
 </head>
 <body>
-    <div class='container'>
-        {% if tasks is not empty %}
-          <p>Here are all your tasks:</p>
-          <ul>
+    <h1>{{ task.getDescription }}</h1>
+
+    {% if tasks is not empty %}
+        <p>Here are your tasks:</p>
+        <ul>
             {% for task in tasks %}
-                <li>{{ task.getDescription }}</li>
+                <li><a href='/tasks/{{ task.getId }}'>{{ task.getDescription }}</a></li>
             {% endfor %}
-          </ul>
-        {% endif %}
+        </ul>
+    {% endif %}
 
-        <form action='/tasks' method='post'>
-          <label for='description'>Task Description</label>
-          <input id='description' name='description' type='text'>
+  <h4> Add a task </h4>
 
-          <button type='submit'>Add task</button>
-        </form>
+    <form action='/tasks' method='post'>
+        <label for="description">Task description:</label>
+        <input name="description" id="description" type="text">
 
-        <form action='/delete_tasks' method='post'>
-            <button type='submit'>Clear</button>
-        </form>
-        </body>
-        </html>
-        <p><a href='/'>View your list of things to do</a></p>
-    </div>
+        <button type="submit" name="button">Add task</button>
+    </form>
+
+    <form action="/delete_tasks" method="post">
+      <button type="submit" name="button"> Delete </button>
+    </form>
+    <p><a href='/'>Home</a></p>
 </body>
 </html>
