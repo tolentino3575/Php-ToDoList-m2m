@@ -16,9 +16,15 @@ class Task
     {
       return $this->id;
     }
-    function setDue($new_due)
+
+    function setDone($new_done)
     {
-      $this->due = (string) $new_due;
+      $this->done = (string) $new_done;
+    }
+
+    function getDone()
+    {
+      return $this->done;
     }
 
     function setDescription($new_description)
@@ -31,7 +37,7 @@ class Task
     }
     function save()
     {
-      $GLOBALS['DB']->exec("INSERT INTO tasks (description) VALUES ('{$this->getDescription()}');");
+      $GLOBALS['DB']->exec("INSERT INTO tasks (description, done) VALUES ('{$this->getDescription()}', {$this->getDone()});");
       $this->id = $GLOBALS['DB']->lastInsertId();
     }
     static function getAll()
@@ -42,10 +48,17 @@ class Task
       foreach($returned_tasks as $task) {
           $description = $task['description'];
           $id = $task['id'];
-          $new_task = new Task($description, $id);
+          $done = $task['done'];
+          $new_task = new Task($description, $id, $done);
           array_push($tasks, $new_task);
       }
       return $tasks;
+    }
+
+    function updateDone()
+    {
+      $GLOBALS['DB']->exec("UPDATE tasks SET done = '1' WHERE id = {$this->getId()};");
+      $this->setDone('1');
     }
 
     function addCategory($category)

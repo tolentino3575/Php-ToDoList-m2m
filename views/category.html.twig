@@ -12,11 +12,16 @@
             <h3>Here are the tasks:</h3>
             <ul>
                 {% for task in tasks %}
-                    <li>{{ task.getDescription }} {{ task.getDue }}</li>
-                    <form action="/marked_done" method="post">
+                    <li>{{ task.getDescription }}
+                      {% if task.getDone == 1 %}
+                          &#10004;
+                            </li>
+                            {% else %}
+                    <form action="/marked_done/{{ task.getId }}" method="post">
+                      <input name="_method" type="hidden" value="patch">
                       <button type="submit" name="button">done</button>
                     </form>
-                    <!-- <li>{{ task.getDue }}</li> -->
+                    {% endif %}
                 {% endfor %}
             </ul>
         {% endif %}

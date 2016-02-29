@@ -5,6 +5,9 @@
 
     $app = new Silex\Application();
 
+    use Symfony\Component\HttpFoundation\Request;
+    Request::enableHttpMethodParameterOverride();
+
     $server = 'mysql:host=localhost;dbname=to_do';
     $username = 'root';
     $password = 'root';
@@ -26,7 +29,8 @@
 
     $app->post("/tasks", function() use ($app) {
       $description = $_POST['description'];
-      $task = new Task($description);
+      $done = $_POST['done'];
+      $task = new Task($description, $id = null, $done);
       $task->save();
       return $app['twig']->render('tasks.html.twig', array(
         'tasks' => Task::getAll()
@@ -70,6 +74,12 @@
         'tasks' => $category->getTasks(),
         'all_tasks' => Task::getAll()
       ));
+    });
+
+    $app->patch("/marked_done/{id}", function($id) use ($app){
+      $task = Task::find($id);
+      $task->updateDone();
+      return $app['twig']->render('category.html.twig', array('categories' => Category::getAll(),  'tasks' => Task::getAll()));
     });
 
     $app->post("/add_categories", function() use ($app){
